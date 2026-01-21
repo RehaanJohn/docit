@@ -29,7 +29,7 @@ import {
 } from "firebase/firestore";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { MaterialIcons } from "@expo/vector-icons";
-import { startSensorDataCollection } from "./SensorData";
+import { startSensorDataCollection } from "./SensorDataService";
 
 type RootStackParamList = {
   Home: undefined;

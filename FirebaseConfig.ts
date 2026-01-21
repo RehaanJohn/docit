@@ -1,7 +1,8 @@
 // Import required Firebase modules
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
   FIREBASE_API_KEY,
   FIREBASE_AUTH_DOMAIN,
@@ -29,9 +30,11 @@ if (!FIREBASE_APP) {
   FIREBASE_APP = initializeApp(firebaseConfig);
 }
 
-// Initialize Firebase services
+// Initialize Firebase services with AsyncStorage persistence
 export const FIREBASE_DB = getFirestore(FIREBASE_APP);
-export const FIREBASE_AUTH = getAuth(FIREBASE_APP); // No duplicate auth initialization
+export const FIREBASE_AUTH = initializeAuth(FIREBASE_APP, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
 
 // Initialize Analytics only on web (safe dynamic import)
 if (typeof window !== 'undefined' && (window as any).document) {
