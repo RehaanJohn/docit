@@ -1,8 +1,7 @@
-// Import required Firebase modules
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// Import required Firebase modules (using compat for Expo Go compatibility)
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 import { 
   FIREBASE_API_KEY,
   FIREBASE_AUTH_DOMAIN,
@@ -25,16 +24,13 @@ const firebaseConfig = {
 };
 
 // Ensure Firebase is initialized only once
-let FIREBASE_APP;
-if (!FIREBASE_APP) {
-  FIREBASE_APP = initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
 }
 
-// Initialize Firebase services with AsyncStorage persistence
-export const FIREBASE_DB = getFirestore(FIREBASE_APP);
-export const FIREBASE_AUTH = initializeAuth(FIREBASE_APP, {
-  persistence: getReactNativePersistence(AsyncStorage)
-});
+// Initialize Firebase services
+export const FIREBASE_DB = firebase.firestore();
+export const FIREBASE_AUTH = firebase.auth();
 
 // Initialize Analytics only on web (safe dynamic import)
 if (typeof window !== 'undefined' && (window as any).document) {

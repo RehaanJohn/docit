@@ -47,7 +47,7 @@ export const startSensorDataCollection = () => {
     
     try {
       // Use your machine's IP for iOS simulator/physical device
-      wsConnection = new WebSocket("ws://192.168.22.142:3000");
+      wsConnection = new WebSocket("ws://192.168.1.28:3000");
       
       wsConnection.onopen = () => {
         console.log("✅ Connected to WebSocket Server");
