@@ -15,11 +15,12 @@ A React Native mobile application for medical emergency monitoring with real-tim
 ## 🛠️ Tech Stack
 
 ### Frontend
-- React Native (Expo)
-- TypeScript
-- Firebase (Auth & Firestore)
-- React Navigation
-- WebSocket for real-time data
+- **React Native** (Expo SDK 52)
+- **TypeScript**
+- **Firebase** v11 (compat mode for Expo Go)
+- **React Navigation** v7
+- **WebSocket** for real-time sensor data
+- **Expo Go** compatible (no native builds required)
 
 ### Backend
 - Node.js + Express
@@ -31,9 +32,9 @@ A React Native mobile application for medical emergency monitoring with real-tim
 
 - **Node.js** 18.x or higher
 - **npm** or **yarn**
-- **Expo CLI**: `npm install -g expo-cli`
-- **iOS Simulator** (Mac only) or **Android Studio** (for Android emulator)
-- **Expo Go** app (for physical device testing)
+- **Expo Go** app on your phone (iOS or Android)
+  - [Download for iOS](https://apps.apple.com/app/expo-go/id982107779)
+  - [Download for Android](https://play.google.com/store/apps/details?id=host.exp.exponent)
 
 ## 🚀 Installation
 
@@ -100,9 +101,9 @@ TWILIO_AUTH_TOKEN=your_twilio_auth_token
 
 ### 3. Update IP Addresses
 
-⚠️ **IMPORTANT**: Update the WebSocket and backend URLs with your local machine's IP address.
+⚠️ **CRITICAL**: The app connects to backend servers running on your computer. You must update the WebSocket URL with your local network IP address.
 
-#### Find Your IP Address:
+#### Find Your Local IP Address:
 
 **Mac/Linux:**
 ```bash
@@ -114,16 +115,24 @@ ifconfig | grep "inet " | grep -v 127.0.0.1
 ipconfig
 ```
 
-Look for your local network IP (usually `192.168.x.x`)
+Look for your local network IP address (usually starts with `192.168.x.x`)
 
-#### Update WebSocket URL
+**Example output:**
+```
+inet 192.168.1.28 netmask 0xffffff00 broadcast 192.168.1.255
+```
+Your IP is `192.168.1.28`
+
+#### Update WebSocket URL in Code
 
 Edit `app/_components/dashboard/SensorDataService.ts`:
 
+Find line ~49 and replace with YOUR IP:
+
 ```typescript
-// Line ~49: Replace with your machine's IP
-wsConnection = new WebSocket("ws://YOUR_IP_ADDRESS:3000");
-// Example: ws://192.168.22.142:3000
+wsConnection = new WebSocket("ws://192.168.1.28:3000");
+//                                  ^^^^^^^^^^^^^^
+//                                  Replace with YOUR local IP
 ```
 
 #### Update Backend Phone Numbers (Optional)
@@ -136,54 +145,100 @@ Edit `backend/backend.js` to customize:
 
 ## 🎯 Running the Application
 
-### Option 1: Run Everything Manually (Recommended for Development)
+### Step 1: Start Backend Servers
 
-Open **3 separate terminal windows**:
+Open **2 separate terminal windows**:
 
-#### Terminal 1: Frontend (Expo)
+#### Terminal 1: MQTT/WebSocket Server (Port 3000)
 ```bash
-npx expo start
+cd backend
+node index.js
 ```
 
-#### Terminal 2: MQTT/WebSocket Backend (Port 3000)
-```bash
-node backend/index.js
+You should see:
+```
+✅ Connected to HiveMQ Cloud
+WebSocket server is running on port 3000
 ```
 
-#### Terminal 3: Twilio Backend (Port 3001)
+#### Terminal 2: Twilio Server (Port 3001) - Optional
 ```bash
-node backend/backend.js
+cd backend
+node backend.js
 ```
 
-### Option 2: Run on Different Platforms
+**Note**: Twilio server requires valid credentials in `backend/.env`. Skip if you don't have Twilio setup.
 
-After starting the servers, in the Expo terminal:
+### Step 2: Start Expo Development Server
 
-- Press **`i`** - Open iOS Simulator (Mac only)
-- Press **`a`** - Open Android Emulator
-- Press **`w`** - Open Web Browser
-- Scan QR code with **Expo Go** app (iOS/Android)
+In a **3rd terminal**:
+
+```bash
+npx expo start --go
+```
+
+This will:
+- Start Metro bundler
+- Display a QR code
+- Use Expo Go mode (compatible with your phone)
+
+### Step 3: Open on Your Phone
+
+1. **Open Expo Go app** on your phone
+2. **Scan the QR code** from the terminal
+   - **iOS**: Use Camera app or Expo Go scanner
+   - **Android**: Use Expo Go scanner
+3. Wait for the bundle to load
+
+**Important**: Your phone and computer must be on the **same WiFi network**.
+
+### Alternative: Run on Emulator/Simulator
+
+If you prefer using emulator instead of physical device:
+
+- Press **`i`** - Open iOS Simulator (Mac only, requires Xcode)
+- Press **`a`** - Open Android Emulator (requires Android Studio)
+- Press **`w`** - Open in Web Browser
 
 ## 📱 First Time Setup
 
 ### Create an Account
 
-1. Launch the app
-2. On the login screen, tap **"Don't have an account? Sign Up"**
-3. Fill in your details:
-   - Email
-   - Password
-   - Name
-   - Age
-   - Blood Group
-   - Medical History
-   - Emergency Contact
-4. Tap **"Register"**
-5. You'll be redirected to the dashboard
+1. **Launch the app** in Expo Go
+2. You'll see the **Home Screen**
+3. Tap **"Don't have an account? Sign Up"** button
+4. Fill in your details:
+   - **Email**: Your email address
+   - **Password**: Secure password (min 6 characters)
+   - **Name**: Full name
+   - **Age**: Your age
+   - **Blood Group**: A+, B+, O+, AB+, etc.
+   - **Medical History**: Any relevant medical conditions
+   - **Emergency Contact**: Phone number (format: +1234567890)
+5. Tap **"Register"**
+6. You'll be automatically logged in and redirected to the **Dashboard**
 
 ### Login
 
-Use the credentials you just created to login.
+1. Enter your **email** and **password**
+2. Tap **"Login"**
+3. You'll see the patient dashboard with real-time health monitoring
+
+### Testing the App
+
+**Features you can test:**
+- ✅ Registration and Login
+- ✅ Dashboard with simulated health data
+- ✅ Profile viewing and editing
+- ✅ Medical history
+- ✅ Chatbot assistant
+- ✅ Location tracking
+- ✅ SOS button (shows alert, won't call without Twilio)
+
+**Real-time sensor data** requires:
+- Backend servers running (Terminal 1 & 2)
+- WebSocket connected with correct IP address
+- MQTT messages from IoT devices (optional)
 
 ## 🗂️ Project Structure
 
@@ -208,7 +263,7 @@ docit/
 │   ├── backend.js               # Twilio SMS/Call server (Port 3001)
 │   └── package.json
 ├── assets/                      # Images, icons, fonts
-├── FirebaseConfig.ts            # Firebase initialization
+├── FirebaseConfig.ts            # Firebase initialization (compat mode)
 ├── .env                         # Frontend environment variables
 ├── app.json                     # Expo configuration
 └── package.json
@@ -216,28 +271,60 @@ docit/
 
 ## 🔧 Troubleshooting
 
-### "Network is unreachable" WebSocket Error
+### Common Issues and Solutions
 
-**Solution**: Update the WebSocket URL in `SensorDataService.ts` with your machine's IP address.
+#### 1. "Network is unreachable" / WebSocket Connection Failed
 
-### Firebase Auth Persistence Warning
+**Cause**: Wrong IP address in the WebSocket URL.
 
-**Already Fixed**: The app now uses AsyncStorage for persistent authentication.
+**Solution**:
+1. Find your IP: `ifconfig | grep "inet " | grep -v 127.0.0.1`
+2. Update `app/_components/dashboard/SensorDataService.ts` line 49
+3. Replace `ws://192.168.1.28:3000` with `ws://YOUR_IP:3000`
+4. Reload the app (shake device → "Reload")
 
-### Twilio "username is required" Error
+#### 2. "Component auth has not been registered yet"
 
-**Solution**: Add valid Twilio credentials to `backend/.env`.
+**Cause**: Firebase Auth compatibility with Expo Go.
 
-### iOS "bundleIdentifier" Error
+**Solution**: Already fixed! The app now uses Firebase compat API (`firebase/compat/auth`).
 
-**Already Fixed**: Bundle identifier set to `com.resqmate.app`.
-
-### Backend Not Connecting
+#### 3. App Can't Connect to Backend
 
 **Check**:
-1. Both backend servers are running
-2. No firewall blocking ports 3000 and 3001
-3. IP addresses are correct in the code
+- Both terminals show backend servers running
+- Your phone and computer are on the **same WiFi network**
+- No firewall blocking ports 3000 or 3001
+- IP address in code matches your computer's local IP
+
+#### 4. Twilio "username is required" Error
+
+**Cause**: Missing or invalid Twilio credentials.
+
+**Solution**: Add valid credentials to `backend/.env` or skip Twilio server (not required for basic functionality).
+
+#### 5. "react-native-worklets version mismatch"
+
+**Solution**:
+```bash
+npm install react-native-worklets@0.5.1
+```
+
+#### 6. Expo Go Shows Blank Screen
+
+**Solution**:
+1. Shake your device
+2. Tap "Reload"
+3. Check terminal for errors
+4. Ensure all dependencies installed: `npm install`
+
+#### 7. Can't Find QR Code / Metro Won't Start
+
+**Solution**:
+```bash
+# Clear cache and restart
+npx expo start --clear
+```
 
 ## 📊 Firestore Database Structure
 
@@ -303,10 +390,34 @@ Send emergency SMS with location
 
 ## 🔐 Security Notes
 
-- Never commit `.env` files to version control
-- Keep Firebase and Twilio credentials secure
-- Use environment variables for all sensitive data
-- Enable Firebase security rules in production
+- ✅ Firebase credentials are stored in `.env` (not committed to git)
+- ✅ `.gitignore` prevents sensitive files from being tracked
+- ⚠️ Never share your `.env` files publicly
+- ⚠️ Keep Twilio and Firebase credentials secure
+- 🔒 Enable Firebase security rules in production
+- 🔒 Use HTTPS for production WebSocket connections
+
+## 🚀 Quick Start Summary
+
+```bash
+# 1. Install dependencies
+npm install
+cd backend && npm install && cd ..
+
+# 2. Create .env file (see Configuration section above)
+
+# 3. Update IP in SensorDataService.ts (line 49)
+
+# 4. Start backends (2 terminals)
+cd backend
+node index.js    # Terminal 1
+node backend.js  # Terminal 2 (optional)
+
+# 5. Start Expo (3rd terminal)
+npx expo start --go
+
+# 6. Scan QR code with Expo Go on your phone
+```
 
 ## 📄 License
 
