@@ -8,7 +8,8 @@ import {
   FIREBASE_PROJECT_ID,
   FIREBASE_STORAGE_BUCKET,
   FIREBASE_MESSAGING_SENDER_ID,
-  FIREBASE_APP_ID
+  FIREBASE_APP_ID,
+  FIREBASE_MEASUREMENT_ID
 } from '@env';
 
 // Firebase configuration
@@ -19,6 +20,7 @@ const firebaseConfig = {
   storageBucket: FIREBASE_STORAGE_BUCKET,
   messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
   appId: FIREBASE_APP_ID,
+  measurementId: FIREBASE_MEASUREMENT_ID,
 };
 
 // Ensure Firebase is initialized only once
@@ -30,3 +32,24 @@ if (!FIREBASE_APP) {
 // Initialize Firebase services
 export const FIREBASE_DB = getFirestore(FIREBASE_APP);
 export const FIREBASE_AUTH = getAuth(FIREBASE_APP); // No duplicate auth initialization
+
+// Initialize Analytics only on web (safe dynamic import)
+if (typeof window !== 'undefined' && (window as any).document) {
+  // dynamic import to avoid bundler issues on native platforms
+  import('firebase/analytics')
+    .then(({ getAnalytics }) => {
+      try {
+        // initialize analytics if measurement id is present
+        if (FIREBASE_MEASUREMENT_ID) {
+          getAnalytics(FIREBASE_APP);
+        }
+      } catch (e) {
+        // ignore analytics initialization errors on non-web environments
+        // (keeps native builds from failing if analytics isn't available)
+        // console.debug('Analytics init skipped', e);
+      }
+    })
+    .catch(() => {
+      // ignore import errors (analytics may not be available in native builds)
+    });
+}

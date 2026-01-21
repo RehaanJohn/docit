@@ -3,8 +3,13 @@ import twilio from "twilio";
 import axios from "axios";
 import ip from "ip";
 import dotenv from "dotenv";
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config({ path: join(__dirname, '.env') });
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -23,7 +28,7 @@ app.post("/call", async (req, res) => {
   try {
     const call = await client.calls.create({
       url: twimlUrl,
-      to: "+918484926697",
+      to: "+918122714827",
       from: "+19516217901",
     });
     res.json({ success: true, callSid: call.sid });
