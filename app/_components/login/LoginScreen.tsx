@@ -72,17 +72,19 @@ const LoginScreen = () => {
       {loading ? (
         <ActivityIndicator size="large" color="#0F6D66" />
       ) : (
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-      )}
+        <>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.signupButton}
-        onPress={() => navigation.navigate("Register")}
-      >
-        <Text style={styles.signupText}>Don't have an account? Sign Up</Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.signupButton}
+            onPress={() => navigation.navigate("Register")}
+          >
+            <Text style={styles.signupText}>Don't have an account? Sign Up</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 };
@@ -132,11 +134,13 @@ const styles = StyleSheet.create({
   },
   signupButton: {
     marginTop: 20,
+    padding: 10,
   },
   signupText: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#0F6D66",
-    textDecorationLine: "underline",
+    fontWeight: "600",
+    textAlign: "center",
   },
 });
 
